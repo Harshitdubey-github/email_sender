@@ -51,6 +51,7 @@ def main():
 
     # Upload Excel file
     st.header("Upload Excel File")
+    st.write("Ensure the Excel file contains the following columns EXACTLY: 'first name', 'last name', and 'email id'.")
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx", "xls"])
 
     if uploaded_file:
