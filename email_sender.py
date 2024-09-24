@@ -9,8 +9,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Email sending function
-def send_email(subject, body, to_email, from_email, password, bcc_email=None):
+# Email sending function with configurable SMTP port and encryption
+def send_email(subject, body, to_email, from_email, password, smtp_server, smtp_port, use_tls, use_ssl, bcc_email=None):
     """Send an email."""
     msg = MIMEMultipart()
     msg['From'] = from_email
@@ -23,10 +23,13 @@ def send_email(subject, body, to_email, from_email, password, bcc_email=None):
     msg.attach(MIMEText(body, 'plain'))
 
     try:
-        smtp_server = "send.smtp.com"
-        smtp_port = 2525
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
+        if use_ssl:
+            server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        else:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            if use_tls:
+                server.starttls()
+
         server.login(from_email, password)
         server.send_message(msg)
         server.quit()
@@ -45,6 +48,12 @@ def main():
     st.header("Email Account Credentials")
     from_email = st.text_input("Your Email Address")
     password = st.text_input("Your Email Password", type="password")
+
+    # SMTP Settings
+    st.header("SMTP Server Settings")
+    smtp_server = st.text_input("SMTP Server", value="send.smtp.com")
+    smtp_port = st.selectbox("SMTP Port", [25, 2525, 2082, 465])
+    encryption = st.selectbox("Encryption", ["OFF", "STARTTLS", "SSL"])
 
     # BCC Email (optional)
     bcc_email = st.text_input("BCC Email Address (Optional)")
@@ -72,6 +81,10 @@ def main():
     subject = st.text_input("Email Subject")
     body = st.text_area("Email Body (will start with 'Dear {first name}')")
 
+    # Determine the encryption type
+    use_ssl = encryption == "SSL"
+    use_tls = encryption == "STARTTLS"
+
     # Send emails
     if st.button("Send Emails"):
         if not uploaded_file:
@@ -95,6 +108,10 @@ def main():
                     to_email,
                     from_email,
                     password,
+                    smtp_server,
+                    smtp_port,
+                    use_tls,
+                    use_ssl,
                     bcc_email=bcc_email if bcc_email else None
                 )
                 if success:
