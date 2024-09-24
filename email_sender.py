@@ -52,7 +52,7 @@ def main():
     # SMTP Settings
     st.header("SMTP Server Settings")
     smtp_server = st.text_input("SMTP Server", value="send.smtp.com")
-    smtp_port = st.selectbox("SMTP Port", [25, 2525, 2082, 465])
+    smtp_port = st.selectbox("SMTP Port", [25, 2525, 587, 2082, 465])
     encryption = st.selectbox("Encryption", ["OFF", "STARTTLS", "SSL"])
 
     # BCC Email (optional)
